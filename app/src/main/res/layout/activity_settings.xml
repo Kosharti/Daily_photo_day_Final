@@ -52,14 +52,16 @@
             <!-- Кнопка для установки/изменения времени -->
             <Button
                 android:id="@+id/button_set_time"
+                style="@style/PrimaryButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="16dp"
                 android:text="Установить время уведомления"
                 android:visibility="gone" />
 
             <Button
                 android:id="@+id/button_back"
+                style="@style/NeutralButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"

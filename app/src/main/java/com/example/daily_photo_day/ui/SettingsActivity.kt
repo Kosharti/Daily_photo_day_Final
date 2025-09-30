@@ -193,15 +193,11 @@ class SettingsActivity : AppCompatActivity() {
         timePicker.show()
     }
 
-    override fun onPause() {
-        super.onPause()
-        // Сохраняем текущее состояние при выходе из активности
-        if (binding.switchNotifications.isChecked) {
-            val hour = sharedPreferences.getInt(PREF_NOTIFICATION_HOUR, -1)
-            val minute = sharedPreferences.getInt(PREF_NOTIFICATION_MINUTE, -1)
-            if (hour != -1 && minute != -1) {
-                NotificationService.scheduleDailyNotification(this, hour, minute)
-            }
-        }
-    }
+    // УДАЛИТЕ метод onPause полностью - он не нужен
+    // override fun onPause() {
+    //     super.onPause()
+    //     // Сбрасываем выделение в навигации при выходе из настроек
+    //     val mainActivity = MainActivity()
+    //     mainActivity.resetBottomNavigation()
+    // }
 }

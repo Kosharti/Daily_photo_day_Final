@@ -13,6 +13,7 @@
 
             <Button
                 android:id="@+id/button_select_image"
+                style="@style/PrimaryButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Выбрать изображение" />
@@ -50,17 +51,19 @@
 
             <Button
                 android:id="@+id/button_save"
+                style="@style/PrimaryButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
                 android:layout_marginTop="16dp"
                 android:text="Сохранить" />
 
             <Button
                 android:id="@+id/button_delete"
+                style="@style/SecondaryButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:backgroundTint="@android:color/holo_red_dark"
+                android:layout_marginTop="16dp"
                 android:text="Удалить"
                 android:textColor="@android:color/white"
                 android:visibility="gone" />
@@ -68,9 +71,10 @@
             <!-- Добавляем кнопку назад -->
             <Button
                 android:id="@+id/button_back"
+                style="@style/NeutralButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="16dp"
                 android:text="Назад" />
 
         </LinearLayout>

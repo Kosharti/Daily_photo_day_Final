@@ -54,14 +54,17 @@
 
             <Button
                 android:id="@+id/button_edit"
+                style="@style/PrimaryButton"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:layout_marginEnd="8dp"
+                android:textSize="14sp"
                 android:text="Редактировать" />
 
             <Button
                 android:id="@+id/button_back"
+                style="@style/NeutralButton"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
