@@ -61,8 +61,14 @@ dependencies {
     implementation(libs.androidx.lifecycle.livedata.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
 
-    // Activity KTX (добавляем эту строку)
+    // Activity KTX
     implementation(libs.androidx.activity.ktx)
+
+    // Для запроса разрешений (уже есть в activity-ktx, но можно добавить явно)
+    implementation("androidx.activity:activity-ktx:1.8.0")
+
+    // Для работы с SharedPreferences
+    implementation("androidx.preference:preference-ktx:1.2.1")
 
     // Glide
     implementation(libs.glide)

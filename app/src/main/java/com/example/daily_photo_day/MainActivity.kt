@@ -15,6 +15,7 @@ import com.example.daily_photo_day.ui.adapter.PhotoPostAdapter
 import com.example.daily_photo_day.viewmodel.PhotoViewModel
 import kotlinx.coroutines.launch
 import androidx.lifecycle.Lifecycle
+import com.example.daily_photo_day.ui.SettingsActivity
 
 class MainActivity : AppCompatActivity() {
     private lateinit var viewModel: PhotoViewModel
@@ -30,11 +31,12 @@ class MainActivity : AppCompatActivity() {
         setupRecyclerView()
         observePosts()
         setupBottomNavigation()
-
+        /*
         binding.fabAddPost.setOnClickListener {
             val intent = Intent(this, AddEditPostActivity::class.java)
             startActivity(intent)
         }
+        */
     }
 
     private fun setupRecyclerView() {
@@ -55,8 +57,18 @@ class MainActivity : AppCompatActivity() {
                     // Уже на главной
                     true
                 }
+                R.id.navigation_add -> {
+                    val intent = Intent(this, AddEditPostActivity::class.java)
+                    startActivity(intent)
+                    true
+                }
                 R.id.navigation_calendar -> {
                     val intent = Intent(this, CalendarActivity::class.java)
+                    startActivity(intent)
+                    true
+                }
+                R.id.navigation_settings -> {
+                    val intent = Intent(this, SettingsActivity::class.java)
                     startActivity(intent)
                     true
                 }

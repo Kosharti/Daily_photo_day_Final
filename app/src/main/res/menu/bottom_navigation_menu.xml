@@ -5,7 +5,15 @@
         android:icon="@android:drawable/ic_menu_gallery"
         android:title="Галерея" />
     <item
+        android:id="@+id/navigation_add"
+        android:icon="@android:drawable/ic_input_add"
+        android:title="Добавить" />
+    <item
         android:id="@+id/navigation_calendar"
         android:icon="@android:drawable/ic_menu_my_calendar"
         android:title="Календарь" />
+    <item
+        android:id="@+id/navigation_settings"
+        android:icon="@android:drawable/ic_menu_preferences"
+        android:title="Настройки" />
 </menu>

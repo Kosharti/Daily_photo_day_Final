@@ -5,6 +5,13 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <!-- Разрешение для уведомлений в Android 13+ -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- Разрешение для точных будильников -->
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
+    <!-- Разрешение для будильников в фоне -->
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
 
     <application
         android:allowBackup="true"
@@ -24,6 +31,7 @@
         <activity android:name=".ui.AddEditPostActivity" />
         <activity android:name=".ui.PostDetailActivity" />
         <activity android:name=".ui.CalendarActivity" />
+        <activity android:name=".ui.SettingsActivity" />
 
         <!-- Добавляем FileProvider -->
         <provider
@@ -35,6 +43,11 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths" />
         </provider>
+
+        <!-- Добавляем сервис уведомлений -->
+        <receiver android:name=".service.NotificationService"
+            android:enabled="true"
+            android:exported="false" />
 
     </application>
 

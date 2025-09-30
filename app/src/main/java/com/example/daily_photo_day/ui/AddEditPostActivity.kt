@@ -18,8 +18,12 @@ import com.bumptech.glide.Glide
 import com.example.daily_photo_day.databinding.ActivityAddEditPostBinding
 import com.example.daily_photo_day.data.entity.PhotoPost
 import com.example.daily_photo_day.viewmodel.PhotoViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
+import java.io.FileOutputStream
+import java.io.InputStream
 import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -65,7 +69,14 @@ class AddEditPostActivity : AppCompatActivity() {
             deletePost()
         }
 
+        // Добавляем кнопку назад
+        binding.buttonBack.setOnClickListener {
+            finish()
+        }
+
         binding.buttonDelete.visibility = if (postId != -1L) View.VISIBLE else View.GONE
+        // Показываем кнопку назад всегда
+        binding.buttonBack.visibility = View.VISIBLE
     }
 
     private fun showImageSourceDialog() {
@@ -91,7 +102,6 @@ class AddEditPostActivity : AppCompatActivity() {
 
     @Throws(IOException::class)
     private fun createImageFile(): File {
-        // Create an image file name
         val timeStamp: String = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
         val storageDir: File? = getExternalFilesDir(null)
 
@@ -100,24 +110,19 @@ class AddEditPostActivity : AppCompatActivity() {
             ".jpg",
             storageDir
         ).apply {
-            // Save a file: path for use with ACTION_VIEW intents
             currentPhotoPath = absolutePath
         }
     }
 
     private fun startCamera() {
         Intent(MediaStore.ACTION_IMAGE_CAPTURE).also { takePictureIntent ->
-            // Ensure that there's a camera activity to handle the intent
             takePictureIntent.resolveActivity(packageManager)?.also {
-                // Create the File where the photo should go
                 val photoFile: File? = try {
                     createImageFile()
                 } catch (ex: IOException) {
-                    // Error occurred while creating the File
                     Toast.makeText(this, "Ошибка создания файла", Toast.LENGTH_SHORT).show()
                     null
                 }
-                // Continue only if the File was successfully created
                 photoFile?.also {
                     val photoURI: Uri = FileProvider.getUriForFile(
                         this,
@@ -138,6 +143,30 @@ class AddEditPostActivity : AppCompatActivity() {
             type = "image/*"
         }
         startActivityForResult(intent, REQUEST_IMAGE_PICK)
+    }
+
+    // Функция для копирования файла из галереи в постоянное хранилище
+    private suspend fun copyFileToInternalStorage(uri: Uri): Uri? = withContext(Dispatchers.IO) {
+        try {
+            val inputStream: InputStream? = contentResolver.openInputStream(uri)
+            val timeStamp: String = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
+            val file = File(getExternalFilesDir(null), "gallery_${timeStamp}.jpg")
+
+            inputStream?.use { input ->
+                FileOutputStream(file).use { output ->
+                    input.copyTo(output)
+                }
+            }
+
+            FileProvider.getUriForFile(
+                this@AddEditPostActivity,
+                "${packageName}.fileprovider",
+                file
+            )
+        } catch (e: IOException) {
+            e.printStackTrace()
+            null
+        }
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
@@ -222,7 +251,6 @@ class AddEditPostActivity : AppCompatActivity() {
         if (resultCode == Activity.RESULT_OK) {
             when (requestCode) {
                 REQUEST_IMAGE_CAPTURE -> {
-                    // Фото было успешно сделано, используем сохраненный путь
                     currentPhotoPath?.let { path ->
                         val file = File(path)
                         if (file.exists()) {
@@ -238,10 +266,20 @@ class AddEditPostActivity : AppCompatActivity() {
                     }
                 }
                 REQUEST_IMAGE_PICK -> {
-                    selectedImageUri = data?.data
-                    Glide.with(this)
-                        .load(selectedImageUri)
-                        .into(binding.imagePreview)
+                    val galleryUri = data?.data
+                    galleryUri?.let { uri ->
+                        lifecycleScope.launch {
+                            val permanentUri = copyFileToInternalStorage(uri)
+                            selectedImageUri = permanentUri
+                            permanentUri?.let {
+                                Glide.with(this@AddEditPostActivity)
+                                    .load(it)
+                                    .into(binding.imagePreview)
+                            } ?: run {
+                                Toast.makeText(this@AddEditPostActivity, "Ошибка загрузки изображения", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    }
                 }
             }
         }
