@@ -15,7 +15,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:background="@android:color/white">
+            android:background="@color/warm_cream">
 
             <ImageView
                 android:id="@+id/image_post"
