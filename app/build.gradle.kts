@@ -61,6 +61,9 @@ dependencies {
     implementation(libs.androidx.lifecycle.livedata.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
 
+    // Activity KTX (добавляем эту строку)
+    implementation(libs.androidx.activity.ktx)
+
     // Glide
     implementation(libs.glide)
     kapt(libs.glide.compiler)

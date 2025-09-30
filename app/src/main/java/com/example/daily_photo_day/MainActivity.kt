@@ -9,6 +9,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.example.daily_photo_day.databinding.ActivityMainBinding
 import com.example.daily_photo_day.ui.AddEditPostActivity
+import com.example.daily_photo_day.ui.CalendarActivity
 import com.example.daily_photo_day.ui.PostDetailActivity
 import com.example.daily_photo_day.ui.adapter.PhotoPostAdapter
 import com.example.daily_photo_day.viewmodel.PhotoViewModel
@@ -28,6 +29,7 @@ class MainActivity : AppCompatActivity() {
         viewModel = ViewModelProvider(this)[PhotoViewModel::class.java]
         setupRecyclerView()
         observePosts()
+        setupBottomNavigation()
 
         binding.fabAddPost.setOnClickListener {
             val intent = Intent(this, AddEditPostActivity::class.java)
@@ -46,6 +48,23 @@ class MainActivity : AppCompatActivity() {
         binding.recyclerViewPosts.layoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
     }
 
+    private fun setupBottomNavigation() {
+        binding.bottomNavigation.setOnNavigationItemSelectedListener { item ->
+            when (item.itemId) {
+                R.id.navigation_home -> {
+                    // Уже на главной
+                    true
+                }
+                R.id.navigation_calendar -> {
+                    val intent = Intent(this, CalendarActivity::class.java)
+                    startActivity(intent)
+                    true
+                }
+                else -> false
+            }
+        }
+    }
+
     private fun observePosts() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -54,9 +73,5 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
-    }
-
-    override fun onResume() {
-        super.onResume()
     }
 }

@@ -2,12 +2,12 @@ package com.example.daily_photo_day.viewmodel
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.viewModelScope
 import com.example.daily_photo_day.data.AppDatabase
 import com.example.daily_photo_day.data.entity.PhotoPost
 import com.example.daily_photo_day.repository.PhotoRepository
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 class PhotoViewModel(application: Application) : AndroidViewModel(application) {
@@ -23,6 +23,12 @@ class PhotoViewModel(application: Application) : AndroidViewModel(application) {
 
     suspend fun getPostById(id: Long): PhotoPost? {
         return repository.getPostById(id)
+    }
+
+    fun getPostsByDate(date: String): Flow<List<PhotoPost>> {
+        return allPosts.map { posts ->
+            posts.filter { it.date.startsWith(date) }
+        }
     }
 
     fun addPost(post: PhotoPost) = viewModelScope.launch {
