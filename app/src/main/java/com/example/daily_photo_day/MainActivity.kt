@@ -93,6 +93,13 @@ class MainActivity : AppCompatActivity() {
         return true
     }
 
+    // Добавляем этот метод для обновления меню при его открытии
+    override fun onPrepareOptionsMenu(menu: Menu): Boolean {
+        // Обновляем состояние отметок каждый раз при открытии меню
+        updateSortMenuCheckedState(menu)
+        return super.onPrepareOptionsMenu(menu)
+    }
+
     private fun setupSearchView(menu: Menu) {
         val searchItem = menu.findItem(R.id.action_search)
         val searchView = searchItem.actionView as? android.widget.SearchView
@@ -183,6 +190,9 @@ class MainActivity : AppCompatActivity() {
         currentSortType = sortType
         saveSortType(sortType)
         performSearch() // Применяем сортировку к текущим результатам
+
+        // Принудительно обновляем меню, чтобы показать правильную отметку
+        invalidateOptionsMenu()
     }
 
     private fun setupRecyclerView() {
@@ -270,7 +280,7 @@ class MainActivity : AppCompatActivity() {
         if (posts.isEmpty()) {
             binding.textEmpty.visibility = View.VISIBLE
             binding.textEmpty.text = if (!currentQuery.isNullOrBlank()) {
-                "По запросu \"$currentQuery\" ничего не найдено"
+                "По запросу \"$currentQuery\" ничего не найдено"
             } else {
                 "Нет фотографий\nДобавьте первую фотографию!"
             }
