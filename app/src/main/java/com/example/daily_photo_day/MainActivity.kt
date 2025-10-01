@@ -34,7 +34,6 @@ class MainActivity : AppCompatActivity() {
     private val PREFS_NAME = "PhotoDiaryPrefs"
     private val SORT_TYPE_KEY = "sort_type"
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -68,7 +67,6 @@ class MainActivity : AppCompatActivity() {
         editor.apply()
     }
 
-
     private fun setupCustomToolbar() {
         // Скрываем стандартный ActionBar
         supportActionBar?.hide()
@@ -86,53 +84,105 @@ class MainActivity : AppCompatActivity() {
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.main_menu, menu)
 
-        // Настраиваем поиск - используем безопасное приведение типов
-        val searchItem = menu.findItem(R.id.action_search)
-        val searchView = searchItem.actionView as? SearchView
+        // Восстанавливаем сохраненную позицию фильтра
+        updateSortMenuCheckedState(menu)
 
-        searchView?.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-            override fun onQueryTextSubmit(query: String?): Boolean {
-                return false
-            }
-
-            override fun onQueryTextChange(newText: String?): Boolean {
-                currentQuery = newText
-                filterAndSortPosts()
-                return true
-            }
-        })
+        // Настраиваем поиск
+        setupSearchView(menu)
 
         return true
+    }
+
+    private fun setupSearchView(menu: Menu) {
+        val searchItem = menu.findItem(R.id.action_search)
+        val searchView = searchItem.actionView as? android.widget.SearchView
+
+        searchView?.let { sv ->
+            // Устанавливаем текущий запрос если есть
+            if (!currentQuery.isNullOrBlank()) {
+                searchItem.expandActionView()
+                sv.setQuery(currentQuery, false)
+            }
+
+            sv.setOnQueryTextListener(object : android.widget.SearchView.OnQueryTextListener {
+                override fun onQueryTextSubmit(query: String?): Boolean {
+                    // Обработка нажатия кнопки поиска на клавиатуре
+                    currentQuery = query
+                    performSearch()
+                    return true
+                }
+
+                override fun onQueryTextChange(newText: String?): Boolean {
+                    // Обработка изменения текста в реальном времени
+                    currentQuery = newText
+                    if (newText.isNullOrBlank()) {
+                        // Если текст пустой, показываем все посты
+                        filterAndSortPosts()
+                    } else {
+                        // Если есть текст, выполняем поиск
+                        performSearch()
+                    }
+                    return true
+                }
+            })
+
+            // Обработка закрытия поиска
+            searchItem.setOnActionExpandListener(object : MenuItem.OnActionExpandListener {
+                override fun onMenuItemActionExpand(item: MenuItem): Boolean {
+                    return true
+                }
+
+                override fun onMenuItemActionCollapse(item: MenuItem): Boolean {
+                    currentQuery = null
+                    filterAndSortPosts()
+                    return true
+                }
+            })
+        }
+    }
+
+    private fun updateSortMenuCheckedState(menu: Menu) {
+        // Сначала снимаем все отметки
+        menu.findItem(R.id.action_sort_date_desc)?.isChecked = false
+        menu.findItem(R.id.action_sort_date_asc)?.isChecked = false
+        menu.findItem(R.id.action_sort_title_asc)?.isChecked = false
+        menu.findItem(R.id.action_sort_title_desc)?.isChecked = false
+
+        // Затем устанавливаем отметку на текущем фильтре
+        when (currentSortType) {
+            SearchFilterHelper.SortType.DATE_DESC -> menu.findItem(R.id.action_sort_date_desc)?.isChecked = true
+            SearchFilterHelper.SortType.DATE_ASC -> menu.findItem(R.id.action_sort_date_asc)?.isChecked = true
+            SearchFilterHelper.SortType.TITLE_ASC -> menu.findItem(R.id.action_sort_title_asc)?.isChecked = true
+            SearchFilterHelper.SortType.TITLE_DESC -> menu.findItem(R.id.action_sort_title_desc)?.isChecked = true
+        }
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.action_sort_date_desc -> {
-                currentSortType = SearchFilterHelper.SortType.DATE_DESC
-                saveSortType(currentSortType)
-                filterAndSortPosts()
+                setSortType(SearchFilterHelper.SortType.DATE_DESC)
                 true
             }
             R.id.action_sort_date_asc -> {
-                currentSortType = SearchFilterHelper.SortType.DATE_ASC
-                saveSortType(currentSortType)
-                filterAndSortPosts()
+                setSortType(SearchFilterHelper.SortType.DATE_ASC)
                 true
             }
             R.id.action_sort_title_asc -> {
-                currentSortType = SearchFilterHelper.SortType.TITLE_ASC
-                saveSortType(currentSortType)
-                filterAndSortPosts()
+                setSortType(SearchFilterHelper.SortType.TITLE_ASC)
                 true
             }
             R.id.action_sort_title_desc -> {
-                currentSortType = SearchFilterHelper.SortType.TITLE_DESC
-                saveSortType(currentSortType)
-                filterAndSortPosts()
+                setSortType(SearchFilterHelper.SortType.TITLE_DESC)
                 true
             }
             else -> super.onOptionsItemSelected(item)
         }
+    }
+
+    private fun setSortType(sortType: SearchFilterHelper.SortType) {
+        currentSortType = sortType
+        saveSortType(sortType)
+        performSearch() // Применяем сортировку к текущим результатам
     }
 
     private fun setupRecyclerView() {
@@ -171,6 +221,7 @@ class MainActivity : AppCompatActivity() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.allPosts.collectLatest { posts ->
+                    // Сохраняем все посты и применяем текущие фильтры
                     filterAndSortPosts(posts)
                 }
             }
@@ -187,8 +238,6 @@ class MainActivity : AppCompatActivity() {
                     currentSortType
                 )
                 adapter.submitList(filtered)
-
-                // Обновляем UI состояния
                 updateEmptyState(filtered)
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -198,11 +247,30 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun performSearch() {
+        lifecycleScope.launch {
+            try {
+                val allPosts = viewModel.allPosts.value ?: emptyList()
+                val filtered = SearchFilterHelper.filterPosts(
+                    allPosts,
+                    currentQuery,
+                    currentSortType
+                )
+                adapter.submitList(filtered)
+                updateEmptyState(filtered)
+            } catch (e: Exception) {
+                e.printStackTrace()
+                binding.textEmpty.visibility = View.VISIBLE
+                binding.textEmpty.text = "Ошибка поиска"
+            }
+        }
+    }
+
     private fun updateEmptyState(posts: List<com.example.daily_photo_day.data.entity.PhotoPost>) {
         if (posts.isEmpty()) {
             binding.textEmpty.visibility = View.VISIBLE
             binding.textEmpty.text = if (!currentQuery.isNullOrBlank()) {
-                "По запросу \"$currentQuery\" ничего не найдено"
+                "По запросu \"$currentQuery\" ничего не найдено"
             } else {
                 "Нет фотографий\nДобавьте первую фотографию!"
             }

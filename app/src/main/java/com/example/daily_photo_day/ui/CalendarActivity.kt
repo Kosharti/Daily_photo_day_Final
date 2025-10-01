@@ -45,9 +45,37 @@ class CalendarActivity : AppCompatActivity() {
             loadPostsForDate(selectedDate)
         }
 
+        // Кнопка для быстрого перехода к выбору года
+        binding.buttonSelectYear.setOnClickListener {
+            showYearSelectionDialog()
+        }
+
         binding.buttonBack.setOnClickListener {
             finish()
         }
+    }
+
+    private fun showYearSelectionDialog() {
+        val currentYear = Calendar.getInstance().get(Calendar.YEAR)
+        val years = (currentYear - 10..currentYear + 10).toList().reversed()
+
+        val builder = android.app.AlertDialog.Builder(this)
+        builder.setTitle("Выберите год")
+
+        val yearsArray = years.map { it.toString() }.toTypedArray()
+
+        builder.setItems(yearsArray) { _, which ->
+            val selectedYear = years[which]
+            // Устанавливаем календарь на выбранный год, текущий месяц и день
+            val calendar = Calendar.getInstance().apply {
+                set(Calendar.YEAR, selectedYear)
+            }
+            binding.calendarView.date = calendar.timeInMillis
+            loadPostsForDate(SimpleDateFormat("dd.MM.yyyy", Locale.getDefault()).format(calendar.time))
+        }
+
+        builder.setNegativeButton("Отмена", null)
+        builder.show()
     }
 
     private fun setupRecyclerView() {

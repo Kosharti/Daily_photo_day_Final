@@ -9,25 +9,18 @@ object SearchFilterHelper {
     fun filterPosts(
         posts: List<PhotoPost>,
         query: String? = null,
-        sortBy: SortType = SortType.DATE_DESC,
-        dateFilter: String? = null
+        sortBy: SortType = SortType.DATE_DESC
     ): List<PhotoPost> {
         var filtered = posts
 
         // Поиск по запросу
         if (!query.isNullOrBlank()) {
+            val searchQuery = query.lowercase(Locale.getDefault())
             filtered = filtered.filter { post ->
-                post.title.contains(query, true) ||
-                        post.description.contains(query, true) ||
-                        post.location.contains(query, true) ||
-                        post.date.contains(query, true)
-            }
-        }
-
-        // Фильтрация по дате
-        if (!dateFilter.isNullOrBlank()) {
-            filtered = filtered.filter { post ->
-                post.date.startsWith(dateFilter)
+                post.title.lowercase(Locale.getDefault()).contains(searchQuery) ||
+                        post.description.lowercase(Locale.getDefault()).contains(searchQuery) ||
+                        post.location.lowercase(Locale.getDefault()).contains(searchQuery) ||
+                        post.date.lowercase(Locale.getDefault()).contains(searchQuery)
             }
         }
 
@@ -35,8 +28,8 @@ object SearchFilterHelper {
         return when (sortBy) {
             SortType.DATE_DESC -> filtered.sortedByDescending { parseDate(it.date) }
             SortType.DATE_ASC -> filtered.sortedBy { parseDate(it.date) }
-            SortType.TITLE_ASC -> filtered.sortedBy { it.title.lowercase() }
-            SortType.TITLE_DESC -> filtered.sortedByDescending { it.title.lowercase() }
+            SortType.TITLE_ASC -> filtered.sortedBy { it.title.lowercase(Locale.getDefault()) }
+            SortType.TITLE_DESC -> filtered.sortedByDescending { it.title.lowercase(Locale.getDefault()) }
         }
     }
 

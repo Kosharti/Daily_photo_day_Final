@@ -50,4 +50,15 @@ class PhotoViewModel(application: Application) : AndroidViewModel(application) {
     fun deletePost(post: PhotoPost) = viewModelScope.launch {
         repository.deletePost(post)
     }
+
+    fun searchPosts(query: String): Flow<List<PhotoPost>> {
+        return allPosts.map { posts ->
+            posts.filter { post ->
+                post.title.contains(query, ignoreCase = true) ||
+                        post.description.contains(query, ignoreCase = true) ||
+                        post.location.contains(query, ignoreCase = true) ||
+                        post.date.contains(query, ignoreCase = true)
+            }
+        }
+    }
 }

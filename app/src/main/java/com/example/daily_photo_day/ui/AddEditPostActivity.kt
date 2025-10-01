@@ -15,6 +15,7 @@ import androidx.core.content.FileProvider
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
+import com.example.daily_photo_day.MainActivity
 import com.example.daily_photo_day.databinding.ActivityAddEditPostBinding
 import com.example.daily_photo_day.data.entity.PhotoPost
 import com.example.daily_photo_day.viewmodel.PhotoViewModel
@@ -223,11 +224,12 @@ class AddEditPostActivity : AppCompatActivity() {
             if (postId != -1L) {
                 viewModel.updatePost(post)
                 Toast.makeText(this@AddEditPostActivity, "Пост обновлен", Toast.LENGTH_SHORT).show()
+                finish()
             } else {
                 viewModel.addPost(post)
                 Toast.makeText(this@AddEditPostActivity, "Пост добавлен", Toast.LENGTH_SHORT).show()
+                finish()
             }
-            finish()
         }
     }
 
@@ -237,6 +239,15 @@ class AddEditPostActivity : AppCompatActivity() {
             post?.let {
                 viewModel.deletePost(it)
                 Toast.makeText(this@AddEditPostActivity, "Пост удален", Toast.LENGTH_SHORT).show()
+
+                // Возвращаемся в MainActivity вместо простого finish()
+                val intent = Intent(this@AddEditPostActivity, MainActivity::class.java).apply {
+                    flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+                }
+                startActivity(intent)
+                finish()
+            } ?: run {
+                // Если пост не найден, просто закрываем активность
                 finish()
             }
         }
