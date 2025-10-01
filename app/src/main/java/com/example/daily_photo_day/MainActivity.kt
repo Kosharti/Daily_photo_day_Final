@@ -23,6 +23,7 @@ import com.example.daily_photo_day.viewmodel.PhotoViewModel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import androidx.lifecycle.Lifecycle
+import com.example.daily_photo_day.utils.ImageCacheHelper
 
 class MainActivity : AppCompatActivity() {
     private lateinit var viewModel: PhotoViewModel
@@ -227,12 +228,20 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    // В MainActivity в методе observePosts:
+
     private fun observePosts() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.allPosts.collectLatest { posts ->
                     // Сохраняем все посты и применяем текущие фильтры
                     filterAndSortPosts(posts)
+
+                    // Предзагружаем изображения в кэш
+                    if (posts.isNotEmpty()) {
+                        val imageUris = posts.map { it.imageUri }
+                        ImageCacheHelper.preloadImages(this@MainActivity, imageUris)
+                    }
                 }
             }
         }
