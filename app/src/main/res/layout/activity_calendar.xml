@@ -13,7 +13,7 @@
             android:id="@+id/textSelectedDate"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Снимки за выбранную дату"
+            android:text="Выберите дату для просмотра снимков"
             android:textSize="18sp"
             android:textStyle="bold"
             android:gravity="center"
@@ -24,6 +24,17 @@
             android:layout_width="match_parent"
             android:layout_height="300dp"
             android:layout_marginBottom="16dp" />
+
+        <!-- Добавляем текст для пустого состояния -->
+        <TextView
+            android:id="@+id/textEmpty"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="Выберите дату для просмотра снимков"
+            android:textSize="16sp"
+            android:padding="16dp"
+            android:visibility="visible" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerView_posts"
@@ -37,7 +48,6 @@
             android:layout_marginTop="16dp"
             android:orientation="horizontal">
 
-            <!-- Добавьте эту кнопку рядом с кнопкой назад в вашем layout -->
             <Button
                 android:id="@+id/buttonSelectYear"
                 style="@style/PrimaryButton"

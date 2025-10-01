@@ -39,6 +39,29 @@ class PhotoViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun getPostsByYear(year: Int): Flow<List<PhotoPost>> {
+        return allPosts.map { posts ->
+            posts.filter { it.getYear() == year }
+        }
+    }
+
+    fun getAvailableYears(): Flow<List<Int>> {
+        return allPosts.map { posts ->
+            posts.map { it.getYear() }
+                .distinct()
+                .sortedDescending()
+        }
+    }
+
+    fun getPostsGroupedByYear(): Flow<Map<Int, List<PhotoPost>>> {
+        return allPosts.map { posts ->
+            posts.groupBy { it.getYear() }
+                .toList()
+                .sortedByDescending { it.first }
+                .toMap()
+        }
+    }
+
     fun addPost(post: PhotoPost) = viewModelScope.launch {
         repository.addPost(post)
     }

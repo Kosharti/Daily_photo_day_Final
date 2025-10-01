@@ -2,6 +2,7 @@ package com.example.daily_photo_day.ui
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -20,6 +21,8 @@ class CalendarActivity : AppCompatActivity() {
     private lateinit var viewModel: PhotoViewModel
     private lateinit var adapter: PhotoPostAdapter
     private var selectedDate: String = ""
+    private var isDateSelected: Boolean = false
+    private var lastCheckedMonthYear: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -30,10 +33,15 @@ class CalendarActivity : AppCompatActivity() {
         setupUI()
         setupRecyclerView()
 
-        // Устанавливаем текущую дату по умолчанию
+        // Устанавливаем текущую дату по умолчанию, но не загружаем посты
         selectedDate = getCurrentDate()
         binding.calendarView.date = System.currentTimeMillis()
-        loadPostsForDate(selectedDate)
+        isDateSelected = false
+        lastCheckedMonthYear = getCurrentMonthYear()
+        clearPosts()
+
+        // Запускаем проверку смены месяца
+        setupRobustMonthChangeListener()
     }
 
     private fun setupUI() {
@@ -42,6 +50,7 @@ class CalendarActivity : AppCompatActivity() {
                 set(year, month, dayOfMonth)
             }
             selectedDate = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault()).format(calendar.time)
+            isDateSelected = true
             loadPostsForDate(selectedDate)
         }
 
@@ -55,6 +64,33 @@ class CalendarActivity : AppCompatActivity() {
         }
     }
 
+    private fun setupRobustMonthChangeListener() {
+        // Проверяем изменение месяца каждые 300ms
+        val monthCheckRunnable = object : Runnable {
+            override fun run() {
+                val currentMonthYear = getCurrentMonthYear()
+                if (currentMonthYear != lastCheckedMonthYear) {
+                    // Месяц изменился - сбрасываем выбранную дату и очищаем посты
+                    isDateSelected = false
+                    clearPosts()
+                    lastCheckedMonthYear = currentMonthYear
+                }
+                binding.calendarView.postDelayed(this, 300)
+            }
+        }
+
+        binding.calendarView.postDelayed(monthCheckRunnable, 300)
+    }
+
+    private fun getCurrentMonthYear(): String {
+        val calendar = Calendar.getInstance().apply {
+            timeInMillis = binding.calendarView.date
+        }
+        val month = calendar.get(Calendar.MONTH)
+        val year = calendar.get(Calendar.YEAR)
+        return "$month-$year"
+    }
+
     private fun showYearSelectionDialog() {
         val currentYear = Calendar.getInstance().get(Calendar.YEAR)
         val years = (currentYear - 10..currentYear + 10).toList().reversed()
@@ -66,12 +102,15 @@ class CalendarActivity : AppCompatActivity() {
 
         builder.setItems(yearsArray) { _, which ->
             val selectedYear = years[which]
-            // Устанавливаем календарь на выбранный год, текущий месяц и день
             val calendar = Calendar.getInstance().apply {
                 set(Calendar.YEAR, selectedYear)
             }
             binding.calendarView.date = calendar.timeInMillis
-            loadPostsForDate(SimpleDateFormat("dd.MM.yyyy", Locale.getDefault()).format(calendar.time))
+            // При смене года сбрасываем выбранную дату
+            isDateSelected = false
+            clearPosts()
+            binding.textSelectedDate.text = "Выберите дату для просмотра снимков"
+            lastCheckedMonthYear = getCurrentMonthYear()
         }
 
         builder.setNegativeButton("Отмена", null)
@@ -94,8 +133,23 @@ class CalendarActivity : AppCompatActivity() {
             viewModel.getPostsByDate(date).collect { posts ->
                 adapter.submitList(posts)
                 binding.textSelectedDate.text = "Снимки за $date (${posts.size})"
+
+                // Показываем/скрываем текст "нет снимков"
+                if (posts.isEmpty()) {
+                    binding.textEmpty.visibility = View.VISIBLE
+                    binding.textEmpty.text = "На $date нет снимков"
+                } else {
+                    binding.textEmpty.visibility = View.GONE
+                }
             }
         }
+    }
+
+    private fun clearPosts() {
+        adapter.submitList(emptyList())
+        binding.textEmpty.visibility = View.VISIBLE
+        binding.textEmpty.text = "Выберите дату для просмотра снимков"
+        binding.textSelectedDate.text = "Выберите дату для просмотра снимков"
     }
 
     private fun getCurrentDate(): String {

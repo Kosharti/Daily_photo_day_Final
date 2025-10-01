@@ -9,7 +9,7 @@ import com.example.daily_photo_day.data.entity.PhotoPost
 
 @Database(
     entities = [PhotoPost::class],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -25,7 +25,8 @@ abstract class AppDatabase : RoomDatabase() {
                     context.applicationContext,
                     AppDatabase::class.java,
                     "photo_diary_database"
-                ).build()
+                )
+                .build()
                 INSTANCE = instance
                 instance
             }

@@ -2,6 +2,7 @@ package com.example.daily_photo_day.ui
 
 import android.content.Intent
 import android.os.Bundle
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -14,6 +15,18 @@ class PostDetailActivity : AppCompatActivity() {
     private lateinit var binding: ActivityPostDetailBinding
     private lateinit var viewModel: PhotoViewModel
     private var postId: Long = -1
+
+    // Регистрируем колбэк для получения результата редактирования
+    private val editPostLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        when (result.resultCode) {
+            AddEditPostActivity.RESULT_POST_UPDATED -> {
+                // Обновляем данные поста после редактирования
+                loadPostData()
+            }
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,9 +48,10 @@ class PostDetailActivity : AppCompatActivity() {
     private fun setupUI() {
         binding.buttonEdit.setOnClickListener {
             val intent = Intent(this, AddEditPostActivity::class.java).apply {
-                putExtra("POST_ID", postId)
+                putExtra(AddEditPostActivity.EXTRA_POST_ID, postId)
             }
-            startActivity(intent)
+            // Используем лаунчер вместо startActivity
+            editPostLauncher.launch(intent)
         }
 
         binding.buttonBack.setOnClickListener {

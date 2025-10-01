@@ -51,6 +51,90 @@
                 android:layout_marginTop="8dp"
                 android:hint="Местоположение" />
 
+            <!-- Блок выбора даты и времени -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:orientation="vertical"
+                android:background="@color/warm_cream"
+                android:padding="12dp"
+                android:elevation="2dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Дата и время съемки"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="8dp" />
+
+                <!-- Переключатель кастомной даты -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Настроить дату и время изображения"
+                        android:textSize="14sp" />
+
+                    <Switch
+                        android:id="@+id/switch_custom_date"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checked="false" />
+
+                </LinearLayout>
+
+                <!-- Кнопка выбора даты -->
+                <Button
+                    android:id="@+id/button_set_date_time"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="Выбрать дату и время"
+                    android:enabled="false"
+                    style="@style/PrimaryButton" />
+
+                <!-- Отображение выбранной даты -->
+                <TextView
+                    android:id="@+id/text_date_time"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:gravity="center" />
+
+                <!-- Подсказка с годом -->
+                <TextView
+                    android:id="@+id/text_year_hint"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:textSize="12sp"
+                    android:textColor="@android:color/darker_gray"
+                    android:gravity="center"
+                    android:text="Год съемки: определяется автоматически" />
+
+                <!-- Информационная подсказка -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="Если не выбрать данный пункт, то будет установлена текущая дата и текущее время"
+                    android:textSize="12sp"
+                    android:textColor="@android:color/darker_gray"
+                    android:background="@color/info_background"
+                    android:padding="8dp" />
+
+            </LinearLayout>
+
             <Button
                 android:id="@+id/button_save"
                 style="@style/PrimaryButton"

@@ -19,6 +19,7 @@ import com.example.daily_photo_day.MainActivity
 import com.example.daily_photo_day.databinding.ActivityAddEditPostBinding
 import com.example.daily_photo_day.data.entity.PhotoPost
 import com.example.daily_photo_day.viewmodel.PhotoViewModel
+import com.example.daily_photo_day.ui.dialogs.DateTimePickerDialog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -37,10 +38,15 @@ class AddEditPostActivity : AppCompatActivity() {
     private var selectedImageUri: Uri? = null
     private var currentPhotoPath: String? = null
 
+    private var selectedDate: String = ""
+    private var useCustomDate = false
+
     companion object {
         private const val REQUEST_IMAGE_CAPTURE = 1001
         private const val REQUEST_IMAGE_PICK = 1002
         private const val REQUEST_CAMERA_PERMISSION = 1003
+        const val EXTRA_POST_ID = "POST_ID"
+        const val RESULT_POST_UPDATED = 100
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -49,11 +55,71 @@ class AddEditPostActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         viewModel = ViewModelProvider(this)[PhotoViewModel::class.java]
-        postId = intent.getLongExtra("POST_ID", -1)
+        postId = intent.getLongExtra(EXTRA_POST_ID, -1)
 
         setupUI()
+        setupDateTimeUI()
         if (postId != -1L) {
             loadPostData()
+        }
+    }
+
+    private fun setupDateTimeUI() {
+        // Устанавливаем текущую дату по умолчанию
+        selectedDate = PhotoPost.getCurrentDateTime()
+        updateDateTimeDisplay()
+
+        binding.buttonSetDateTime.setOnClickListener {
+            showDateTimePicker()
+        }
+
+        binding.switchCustomDate.setOnCheckedChangeListener { _, isChecked ->
+            useCustomDate = isChecked
+            updateDateTimeButtonVisibility()
+            if (!isChecked) {
+                // Возвращаем текущую дату
+                selectedDate = PhotoPost.getCurrentDateTime()
+                updateDateTimeDisplay()
+            }
+        }
+
+        // Изначально скрываем кнопку выбора даты
+        updateDateTimeButtonVisibility()
+    }
+
+    private fun updateDateTimeButtonVisibility() {
+        if (useCustomDate) {
+            binding.buttonSetDateTime.visibility = View.VISIBLE
+            binding.buttonSetDateTime.isEnabled = true
+        } else {
+            binding.buttonSetDateTime.visibility = View.GONE
+        }
+    }
+
+    private fun showDateTimePicker() {
+        DateTimePickerDialog(this) { dateTime ->
+            if (DateTimePickerDialog.isValidFutureDate(dateTime)) {
+                selectedDate = dateTime
+                updateDateTimeDisplay()
+            } else {
+                Toast.makeText(
+                    this,
+                    "Некорректная дата. Убедитесь, что дата не в будущем",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        }.show(selectedDate)
+    }
+
+    private fun updateDateTimeDisplay() {
+        binding.textDateTime.text = selectedDate
+
+        // Показываем год для информации
+        try {
+            val year = selectedDate.substring(6, 10)
+            binding.textYearHint.text = "Год съемки: $year"
+        } catch (e: Exception) {
+            binding.textYearHint.text = "Год съемки: определяется автоматически"
         }
     }
 
@@ -192,6 +258,13 @@ class AddEditPostActivity : AppCompatActivity() {
                 binding.editTextLocation.setText(it.location)
 
                 selectedImageUri = Uri.parse(it.imageUri)
+                selectedDate = it.date
+                useCustomDate = it.originalDate != null
+
+                updateDateTimeDisplay()
+                binding.switchCustomDate.isChecked = useCustomDate
+                updateDateTimeButtonVisibility() // Обновляем видимость кнопки после загрузки данных
+
                 Glide.with(this@AddEditPostActivity)
                     .load(selectedImageUri)
                     .into(binding.imagePreview)
@@ -209,6 +282,12 @@ class AddEditPostActivity : AppCompatActivity() {
             return
         }
 
+        // Валидация даты
+        if (!PhotoPost.isValidDate(selectedDate)) {
+            Toast.makeText(this, "Некорректный формат даты", Toast.LENGTH_SHORT).show()
+            return
+        }
+
         lifecycleScope.launch {
             val currentPost = if (postId != -1L) viewModel.getPostById(postId) else null
 
@@ -218,12 +297,18 @@ class AddEditPostActivity : AppCompatActivity() {
                 title = title,
                 description = description,
                 location = location,
-                date = currentPost?.date ?: getCurrentDateTime()
+                date = selectedDate,
+                originalDate = if (useCustomDate) System.currentTimeMillis() else null
             )
 
             if (postId != -1L) {
                 viewModel.updatePost(post)
                 Toast.makeText(this@AddEditPostActivity, "Пост обновлен", Toast.LENGTH_SHORT).show()
+
+                // Устанавливаем результат обновления и завершаем активность
+                setResult(RESULT_POST_UPDATED, Intent().apply {
+                    putExtra(EXTRA_POST_ID, postId)
+                })
                 finish()
             } else {
                 viewModel.addPost(post)
@@ -251,10 +336,6 @@ class AddEditPostActivity : AppCompatActivity() {
                 finish()
             }
         }
-    }
-
-    private fun getCurrentDateTime(): String {
-        return SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.getDefault()).format(Date())
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
