@@ -21,8 +21,6 @@ class CalendarActivity : AppCompatActivity() {
     private lateinit var viewModel: PhotoViewModel
     private lateinit var adapter: PhotoPostAdapter
     private var selectedDate: String = ""
-    private var isDateSelected: Boolean = false
-    private var lastCheckedMonthYear: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,15 +31,10 @@ class CalendarActivity : AppCompatActivity() {
         setupUI()
         setupRecyclerView()
 
-        // Устанавливаем текущую дату по умолчанию, но не загружаем посты
+        // Устанавливаем текущую дату по умолчанию
         selectedDate = getCurrentDate()
         binding.calendarView.date = System.currentTimeMillis()
-        isDateSelected = false
-        lastCheckedMonthYear = getCurrentMonthYear()
         clearPosts()
-
-        // Запускаем проверку смены месяца
-        setupRobustMonthChangeListener()
     }
 
     private fun setupUI() {
@@ -50,7 +43,6 @@ class CalendarActivity : AppCompatActivity() {
                 set(year, month, dayOfMonth)
             }
             selectedDate = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault()).format(calendar.time)
-            isDateSelected = true
             loadPostsForDate(selectedDate)
         }
 
@@ -62,33 +54,6 @@ class CalendarActivity : AppCompatActivity() {
         binding.buttonBack.setOnClickListener {
             finish()
         }
-    }
-
-    private fun setupRobustMonthChangeListener() {
-        // Проверяем изменение месяца каждые 300ms
-        val monthCheckRunnable = object : Runnable {
-            override fun run() {
-                val currentMonthYear = getCurrentMonthYear()
-                if (currentMonthYear != lastCheckedMonthYear) {
-                    // Месяц изменился - сбрасываем выбранную дату и очищаем посты
-                    isDateSelected = false
-                    clearPosts()
-                    lastCheckedMonthYear = currentMonthYear
-                }
-                binding.calendarView.postDelayed(this, 300)
-            }
-        }
-
-        binding.calendarView.postDelayed(monthCheckRunnable, 300)
-    }
-
-    private fun getCurrentMonthYear(): String {
-        val calendar = Calendar.getInstance().apply {
-            timeInMillis = binding.calendarView.date
-        }
-        val month = calendar.get(Calendar.MONTH)
-        val year = calendar.get(Calendar.YEAR)
-        return "$month-$year"
     }
 
     private fun showYearSelectionDialog() {
@@ -106,11 +71,8 @@ class CalendarActivity : AppCompatActivity() {
                 set(Calendar.YEAR, selectedYear)
             }
             binding.calendarView.date = calendar.timeInMillis
-            // При смене года сбрасываем выбранную дату
-            isDateSelected = false
+            // При смене года очищаем посты
             clearPosts()
-            binding.textSelectedDate.text = "Выберите дату для просмотра снимков"
-            lastCheckedMonthYear = getCurrentMonthYear()
         }
 
         builder.setNegativeButton("Отмена", null)
@@ -132,14 +94,15 @@ class CalendarActivity : AppCompatActivity() {
         lifecycleScope.launch {
             viewModel.getPostsByDate(date).collect { posts ->
                 adapter.submitList(posts)
-                binding.textSelectedDate.text = "Снимки за $date (${posts.size})"
 
-                // Показываем/скрываем текст "нет снимков"
-                if (posts.isEmpty()) {
-                    binding.textEmpty.visibility = View.VISIBLE
-                    binding.textEmpty.text = "На $date нет снимков"
-                } else {
+                // Простая и понятная надпись
+                if (posts.isNotEmpty()) {
+                    binding.textSelectedDate.text = "Снимки за $date (${posts.size})"
                     binding.textEmpty.visibility = View.GONE
+                } else {
+                    binding.textSelectedDate.text = "Снимки за $date"
+                    binding.textEmpty.visibility = View.VISIBLE
+                    binding.textEmpty.text = "На выбранную дату снимков нет"
                 }
             }
         }
