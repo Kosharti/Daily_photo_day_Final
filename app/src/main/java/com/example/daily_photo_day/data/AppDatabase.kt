@@ -26,7 +26,7 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "photo_diary_database"
                 )
-                //.fallbackToDestructiveMigration() // для тестирования
+                .fallbackToDestructiveMigration() // для тестирования
                 .build()
                 INSTANCE = instance
                 instance
