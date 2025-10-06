@@ -65,7 +65,6 @@ class AddEditPostActivity : AppCompatActivity() {
     }
 
     private fun setupDateTimeUI() {
-        // Устанавливаем текущую дату по умолчанию
         selectedDate = PhotoPost.getCurrentDateTime()
         updateDateTimeDisplay()
 
@@ -77,13 +76,11 @@ class AddEditPostActivity : AppCompatActivity() {
             useCustomDate = isChecked
             updateDateTimeButtonVisibility()
             if (!isChecked) {
-                // Возвращаем текущую дату
                 selectedDate = PhotoPost.getCurrentDateTime()
                 updateDateTimeDisplay()
             }
         }
 
-        // Изначально скрываем кнопку выбора даты
         updateDateTimeButtonVisibility()
     }
 
@@ -114,7 +111,6 @@ class AddEditPostActivity : AppCompatActivity() {
     private fun updateDateTimeDisplay() {
         binding.textDateTime.text = selectedDate
 
-        // Показываем год для информации
         try {
             val year = selectedDate.substring(6, 10)
             binding.textYearHint.text = "Год съемки: $year"
@@ -136,13 +132,11 @@ class AddEditPostActivity : AppCompatActivity() {
             deletePost()
         }
 
-        // Добавляем кнопку назад
         binding.buttonBack.setOnClickListener {
             finish()
         }
 
         binding.buttonDelete.visibility = if (postId != -1L) View.VISIBLE else View.GONE
-        // Показываем кнопку назад всегда
         binding.buttonBack.visibility = View.VISIBLE
     }
 
@@ -212,7 +206,6 @@ class AddEditPostActivity : AppCompatActivity() {
         startActivityForResult(intent, REQUEST_IMAGE_PICK)
     }
 
-    // Функция для копирования файла из галереи в постоянное хранилище
     private suspend fun copyFileToInternalStorage(uri: Uri): Uri? = withContext(Dispatchers.IO) {
         try {
             val inputStream: InputStream? = contentResolver.openInputStream(uri)
@@ -263,7 +256,7 @@ class AddEditPostActivity : AppCompatActivity() {
 
                 updateDateTimeDisplay()
                 binding.switchCustomDate.isChecked = useCustomDate
-                updateDateTimeButtonVisibility() // Обновляем видимость кнопки после загрузки данных
+                updateDateTimeButtonVisibility()
 
                 Glide.with(this@AddEditPostActivity)
                     .load(selectedImageUri)
@@ -282,7 +275,6 @@ class AddEditPostActivity : AppCompatActivity() {
             return
         }
 
-        // Валидация даты
         if (!PhotoPost.isValidDate(selectedDate)) {
             Toast.makeText(this, "Некорректный формат даты", Toast.LENGTH_SHORT).show()
             return
@@ -305,7 +297,6 @@ class AddEditPostActivity : AppCompatActivity() {
                 viewModel.updatePost(post)
                 Toast.makeText(this@AddEditPostActivity, "Пост обновлен", Toast.LENGTH_SHORT).show()
 
-                // Устанавливаем результат обновления и завершаем активность
                 setResult(RESULT_POST_UPDATED, Intent().apply {
                     putExtra(EXTRA_POST_ID, postId)
                 })
@@ -325,14 +316,12 @@ class AddEditPostActivity : AppCompatActivity() {
                 viewModel.deletePost(it)
                 Toast.makeText(this@AddEditPostActivity, "Пост удален", Toast.LENGTH_SHORT).show()
 
-                // Возвращаемся в MainActivity вместо простого finish()
                 val intent = Intent(this@AddEditPostActivity, MainActivity::class.java).apply {
                     flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
                 }
                 startActivity(intent)
                 finish()
             } ?: run {
-                // Если пост не найден, просто закрываем активность
                 finish()
             }
         }

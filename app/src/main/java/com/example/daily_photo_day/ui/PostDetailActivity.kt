@@ -16,13 +16,11 @@ class PostDetailActivity : AppCompatActivity() {
     private lateinit var viewModel: PhotoViewModel
     private var postId: Long = -1
 
-    // Регистрируем колбэк для получения результата редактирования
     private val editPostLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
         when (result.resultCode) {
             AddEditPostActivity.RESULT_POST_UPDATED -> {
-                // Обновляем данные поста после редактирования
                 loadPostData()
             }
         }
@@ -50,7 +48,6 @@ class PostDetailActivity : AppCompatActivity() {
             val intent = Intent(this, AddEditPostActivity::class.java).apply {
                 putExtra(AddEditPostActivity.EXTRA_POST_ID, postId)
             }
-            // Используем лаунчер вместо startActivity
             editPostLauncher.launch(intent)
         }
 

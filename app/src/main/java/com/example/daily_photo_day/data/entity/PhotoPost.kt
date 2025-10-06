@@ -14,8 +14,8 @@ data class PhotoPost(
     val title: String,
     val description: String,
     val location: String,
-    val date: String, // Формат: "dd.MM.yyyy HH:mm"
-    val originalDate: Long? = null // Timestamp оригинальной даты фото
+    val date: String,
+    val originalDate: Long? = null
 ) {
     fun getYear(): Int {
         return try {

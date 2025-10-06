@@ -31,7 +31,6 @@ class CalendarActivity : AppCompatActivity() {
         setupUI()
         setupRecyclerView()
 
-        // Устанавливаем текущую дату по умолчанию
         selectedDate = getCurrentDate()
         binding.calendarView.date = System.currentTimeMillis()
         clearPosts()
@@ -46,7 +45,6 @@ class CalendarActivity : AppCompatActivity() {
             loadPostsForDate(selectedDate)
         }
 
-        // Кнопка для быстрого перехода к выбору года
         binding.buttonSelectYear.setOnClickListener {
             showYearSelectionDialog()
         }
@@ -71,7 +69,6 @@ class CalendarActivity : AppCompatActivity() {
                 set(Calendar.YEAR, selectedYear)
             }
             binding.calendarView.date = calendar.timeInMillis
-            // При смене года очищаем посты
             clearPosts()
         }
 
@@ -95,7 +92,6 @@ class CalendarActivity : AppCompatActivity() {
             viewModel.getPostsByDate(date).collect { posts ->
                 adapter.submitList(posts)
 
-                // Простая и понятная надпись
                 if (posts.isNotEmpty()) {
                     binding.textSelectedDate.text = "Снимки за $date (${posts.size})"
                     binding.textEmpty.visibility = View.GONE

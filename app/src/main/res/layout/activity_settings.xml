@@ -50,7 +50,6 @@
                 android:textSize="14sp"
                 android:textColor="@android:color/darker_gray" />
 
-            <!-- Кнопка для установки/изменения времени -->
             <Button
                 android:id="@+id/button_set_time"
                 style="@style/PrimaryButton"

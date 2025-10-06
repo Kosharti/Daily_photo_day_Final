@@ -13,7 +13,6 @@ object SearchFilterHelper {
     ): List<PhotoPost> {
         var filtered = posts
 
-        // Поиск по запросу
         if (!query.isNullOrBlank()) {
             val searchQuery = query.lowercase(Locale.getDefault())
             filtered = filtered.filter { post ->
@@ -24,7 +23,6 @@ object SearchFilterHelper {
             }
         }
 
-        // Сортировка
         return when (sortBy) {
             SortType.DATE_DESC -> filtered.sortedByDescending { parseDate(it.date) }
             SortType.DATE_ASC -> filtered.sortedBy { parseDate(it.date) }
@@ -44,7 +42,6 @@ object SearchFilterHelper {
                     return SimpleDateFormat(format, Locale.getDefault())
                         .parse(dateString)?.time ?: 0L
                 } catch (e: Exception) {
-                    // Пробуем следующий формат
                 }
             }
             0L

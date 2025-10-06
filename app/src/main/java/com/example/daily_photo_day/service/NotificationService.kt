@@ -17,13 +17,11 @@ import java.util.Calendar
 class NotificationService : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
-        // Проверяем, включены ли уведомления в настройках
         val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
         val notificationsEnabled = sharedPreferences.getBoolean("notifications_enabled", false)
 
         if (notificationsEnabled) {
             showNotification(context)
-            // Переустанавливаем уведомление на следующий день
             rescheduleNotification(context)
         }
     }
@@ -31,7 +29,6 @@ class NotificationService : BroadcastReceiver() {
     private fun showNotification(context: Context) {
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
-        // Создаем канал уведомлений (для Android 8.0+)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 CHANNEL_ID,
@@ -43,7 +40,6 @@ class NotificationService : BroadcastReceiver() {
             notificationManager.createNotificationChannel(channel)
         }
 
-        // Создаем интент для открытия приложения
         val contentIntent = Intent(context, MainActivity::class.java)
         val contentPendingIntent = PendingIntent.getActivity(
             context,
@@ -52,7 +48,6 @@ class NotificationService : BroadcastReceiver() {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        // Создаем уведомление с правильным API
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(android.R.drawable.ic_menu_camera)
             .setContentTitle("Ежедневный фотодневник")
@@ -61,7 +56,6 @@ class NotificationService : BroadcastReceiver() {
             .setAutoCancel(true)
             .build()
 
-        // Проверяем разрешение на отправку уведомлений для Android 13+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (notificationManager.areNotificationsEnabled()) {
                 notificationManager.notify(NOTIFICATION_ID, notification)
@@ -95,19 +89,16 @@ class NotificationService : BroadcastReceiver() {
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
 
-            // Устанавливаем время уведомления
             val calendar = Calendar.getInstance().apply {
                 set(Calendar.HOUR_OF_DAY, hour)
                 set(Calendar.MINUTE, minute)
                 set(Calendar.SECOND, 0)
 
-                // Если время уже прошло сегодня, устанавливаем на завтра
                 if (timeInMillis <= System.currentTimeMillis()) {
                     add(Calendar.DAY_OF_YEAR, 1)
                 }
             }
 
-            // Для Android 6.0+ используем setExactAndAllowWhileIdle для лучшей точности
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 alarmManager.setExactAndAllowWhileIdle(
                     AlarmManager.RTC_WAKEUP,
@@ -134,7 +125,6 @@ class NotificationService : BroadcastReceiver() {
             )
             alarmManager.cancel(pendingIntent)
 
-            // Также отменяем само уведомление если оно показано
             val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             notificationManager.cancel(NOTIFICATION_ID)
         }

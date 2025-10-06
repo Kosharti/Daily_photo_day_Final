@@ -17,7 +17,6 @@ class DateTimePickerDialog(
     private val dateFormat = SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.getDefault())
 
     fun show(currentDate: String? = null) {
-        // Если передана текущая дата, парсим ее
         currentDate?.let {
             try {
                 val date = dateFormat.parse(it)
@@ -25,12 +24,10 @@ class DateTimePickerDialog(
                     calendar.time = date
                 }
             } catch (e: Exception) {
-                // Если не удалось распарсить, используем текущую дату
                 calendar.time = Date()
             }
         }
 
-        // Сначала выбираем дату
         showDatePicker()
     }
 
@@ -42,14 +39,13 @@ class DateTimePickerDialog(
                 calendar.set(Calendar.MONTH, month)
                 calendar.set(Calendar.DAY_OF_MONTH, day)
 
-                // Проверяем, не будущая ли дата
                 if (calendar.timeInMillis > System.currentTimeMillis()) {
                     Toast.makeText(
                         context,
                         "Нельзя установить будущую дату",
                         Toast.LENGTH_SHORT
                     ).show()
-                    calendar.time = Date() // Устанавливаем текущую дату
+                    calendar.time = Date()
                 }
 
                 showTimePicker()
@@ -59,7 +55,6 @@ class DateTimePickerDialog(
             calendar.get(Calendar.DAY_OF_MONTH)
         )
 
-        // Запрещаем выбор будущих дат
         datePicker.datePicker.maxDate = System.currentTimeMillis()
         datePicker.show()
     }
@@ -71,7 +66,6 @@ class DateTimePickerDialog(
                 calendar.set(Calendar.HOUR_OF_DAY, hour)
                 calendar.set(Calendar.MINUTE, minute)
 
-                // Проверяем, не будущее ли время для сегодняшней даты
                 val now = Calendar.getInstance()
                 if (calendar.get(Calendar.YEAR) == now.get(Calendar.YEAR) &&
                     calendar.get(Calendar.MONTH) == now.get(Calendar.MONTH) &&
@@ -83,7 +77,7 @@ class DateTimePickerDialog(
                         "Нельзя установить будущее время для сегодняшней даты",
                         Toast.LENGTH_SHORT
                     ).show()
-                    calendar.time = Date() // Устанавливаем текущее время
+                    calendar.time = Date()
                 }
 
                 val selectedDateTime = dateFormat.format(calendar.time)

@@ -51,7 +51,6 @@
                 android:layout_marginTop="8dp"
                 android:hint="Местоположение" />
 
-            <!-- Блок выбора даты и времени -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -69,7 +68,6 @@
                     android:textStyle="bold"
                     android:layout_marginBottom="8dp" />
 
-                <!-- Переключатель кастомной даты -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -91,7 +89,6 @@
 
                 </LinearLayout>
 
-                <!-- Кнопка выбора даты -->
                 <Button
                     android:id="@+id/button_set_date_time"
                     android:layout_width="match_parent"
@@ -101,7 +98,6 @@
                     android:enabled="false"
                     style="@style/PrimaryButton" />
 
-                <!-- Отображение выбранной даты -->
                 <TextView
                     android:id="@+id/text_date_time"
                     android:layout_width="match_parent"
@@ -111,7 +107,6 @@
                     android:textStyle="bold"
                     android:gravity="center" />
 
-                <!-- Подсказка с годом -->
                 <TextView
                     android:id="@+id/text_year_hint"
                     android:layout_width="match_parent"
@@ -122,7 +117,6 @@
                     android:gravity="center"
                     android:text="Год съемки: определяется автоматически" />
 
-                <!-- Информационная подсказка -->
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -154,7 +148,6 @@
                 android:textColor="@android:color/white"
                 android:visibility="gone" />
 
-            <!-- Добавляем кнопку назад -->
             <Button
                 android:id="@+id/button_back"
                 style="@style/NeutralButton"

@@ -15,15 +15,15 @@ class MyApplication : Application() {
     }
 
     private fun setupGlideCache() {
-        val memoryCacheSize = (Runtime.getRuntime().maxMemory() / 8).toLong() // 1/8 от доступной памяти
+        val memoryCacheSize = (Runtime.getRuntime().maxMemory() / 8).toLong()
 
         Glide.init(this, GlideBuilder()
-            .setMemoryCache(LruResourceCache(memoryCacheSize)) // Кэш в оперативной памяти
+            .setMemoryCache(LruResourceCache(memoryCacheSize))
             .setDiskCache(
                 InternalCacheDiskCacheFactory(
                     this,
                     "glide_cache",
-                    100 * 1024 * 1024 // 100 MB на диске
+                    100 * 1024 * 1024
                 )
             )
         )

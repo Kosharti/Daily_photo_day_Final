@@ -40,7 +40,6 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Загружаем сохраненный тип сортировки
         loadSortType()
 
         setupCustomToolbar()
@@ -69,34 +68,26 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupCustomToolbar() {
-        // Скрываем стандартный ActionBar
         supportActionBar?.hide()
 
-        // Устанавливаем наш Toolbar как ActionBar
         setSupportActionBar(binding.toolbar)
 
-        // Убираем стандартный заголовок
         supportActionBar?.setDisplayShowTitleEnabled(false)
 
-        // Настраиваем наш кастомный тулбар
         binding.toolbarTitle.text = "Ежедневный фотодневник"
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.main_menu, menu)
 
-        // Восстанавливаем сохраненную позицию фильтра
         updateSortMenuCheckedState(menu)
 
-        // Настраиваем поиск
         setupSearchView(menu)
 
         return true
     }
 
-    // Добавляем этот метод для обновления меню при его открытии
     override fun onPrepareOptionsMenu(menu: Menu): Boolean {
-        // Обновляем состояние отметок каждый раз при открытии меню
         updateSortMenuCheckedState(menu)
         return super.onPrepareOptionsMenu(menu)
     }
@@ -106,7 +97,6 @@ class MainActivity : AppCompatActivity() {
         val searchView = searchItem.actionView as? android.widget.SearchView
 
         searchView?.let { sv ->
-            // Устанавливаем текущий запрос если есть
             if (!currentQuery.isNullOrBlank()) {
                 searchItem.expandActionView()
                 sv.setQuery(currentQuery, false)
@@ -114,27 +104,22 @@ class MainActivity : AppCompatActivity() {
 
             sv.setOnQueryTextListener(object : android.widget.SearchView.OnQueryTextListener {
                 override fun onQueryTextSubmit(query: String?): Boolean {
-                    // Обработка нажатия кнопки поиска на клавиатуре
                     currentQuery = query
                     performSearch()
                     return true
                 }
 
                 override fun onQueryTextChange(newText: String?): Boolean {
-                    // Обработка изменения текста в реальном времени
                     currentQuery = newText
                     if (newText.isNullOrBlank()) {
-                        // Если текст пустой, показываем все посты
                         filterAndSortPosts()
                     } else {
-                        // Если есть текст, выполняем поиск
                         performSearch()
                     }
                     return true
                 }
             })
 
-            // Обработка закрытия поиска
             searchItem.setOnActionExpandListener(object : MenuItem.OnActionExpandListener {
                 override fun onMenuItemActionExpand(item: MenuItem): Boolean {
                     return true
@@ -150,13 +135,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun updateSortMenuCheckedState(menu: Menu) {
-        // Сначала снимаем все отметки
         menu.findItem(R.id.action_sort_date_desc)?.isChecked = false
         menu.findItem(R.id.action_sort_date_asc)?.isChecked = false
         menu.findItem(R.id.action_sort_title_asc)?.isChecked = false
         menu.findItem(R.id.action_sort_title_desc)?.isChecked = false
 
-        // Затем устанавливаем отметку на текущем фильтре
         when (currentSortType) {
             SearchFilterHelper.SortType.DATE_DESC -> menu.findItem(R.id.action_sort_date_desc)?.isChecked = true
             SearchFilterHelper.SortType.DATE_ASC -> menu.findItem(R.id.action_sort_date_asc)?.isChecked = true
@@ -190,9 +173,8 @@ class MainActivity : AppCompatActivity() {
     private fun setSortType(sortType: SearchFilterHelper.SortType) {
         currentSortType = sortType
         saveSortType(sortType)
-        performSearch() // Применяем сортировку к текущим результатам
+        performSearch()
 
-        // Принудительно обновляем меню, чтобы показать правильную отметку
         invalidateOptionsMenu()
     }
 
@@ -228,16 +210,12 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // В MainActivity в методе observePosts:
-
     private fun observePosts() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.allPosts.collectLatest { posts ->
-                    // Сохраняем все посты и применяем текущие фильтры
                     filterAndSortPosts(posts)
 
-                    // Предзагружаем изображения в кэш
                     if (posts.isNotEmpty()) {
                         val imageUris = posts.map { it.imageUri }
                         ImageCacheHelper.preloadImages(this@MainActivity, imageUris)
@@ -300,7 +278,6 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        // Всегда выделяем "Галерея" при возврате в MainActivity
         binding.bottomNavigation.selectedItemId = R.id.navigation_home
     }
 }

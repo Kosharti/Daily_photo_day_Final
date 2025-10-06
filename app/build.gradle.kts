@@ -52,26 +52,20 @@ dependencies {
     implementation(libs.androidx.coordinatorlayout)
     implementation(libs.androidx.cardview)
 
-    // Room
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
     kapt(libs.androidx.room.compiler)
 
-    // Lifecycle
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
     implementation(libs.androidx.lifecycle.livedata.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
 
-    // Activity KTX
     implementation(libs.androidx.activity.ktx)
 
-    // Для запроса разрешений (уже есть в activity-ktx, но можно добавить явно)
     implementation("androidx.activity:activity-ktx:1.8.0")
 
-    // Для работы с SharedPreferences
     implementation("androidx.preference:preference-ktx:1.2.1")
 
-    // Glide
     implementation(libs.glide)
     kapt(libs.glide.compiler)
 

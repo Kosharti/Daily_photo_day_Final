@@ -26,15 +26,12 @@ class SettingsActivity : AppCompatActivity() {
         private const val PREF_NOTIFICATION_TIME_TEXT = "notification_time_text"
     }
 
-    // Регистрируем лаунчер для запроса разрешений
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted ->
         if (isGranted) {
-            // Разрешение получено, включаем уведомления без показа часов
             enableNotificationsWithoutTimePicker()
         } else {
-            // Разрешение не получено
             binding.switchNotifications.isChecked = false
             binding.textNotificationTime.text = "Разрешение на уведомления не предоставлено"
             saveNotificationSettings(false, -1, -1, "Разрешение на уведомления не предоставлено")
@@ -55,15 +52,12 @@ class SettingsActivity : AppCompatActivity() {
     private fun setupUI() {
         binding.switchNotifications.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
-                // Включаем уведомления без показа часов
                 checkNotificationPermission()
             } else {
-                // Выключаем уведомления
                 disableNotifications()
             }
         }
 
-        // Добавляем кнопку для установки/изменения времени уведомления
         binding.buttonSetTime.setOnClickListener {
             showTimePicker()
         }
@@ -82,14 +76,11 @@ class SettingsActivity : AppCompatActivity() {
         binding.switchNotifications.isChecked = notificationsEnabled
         binding.textNotificationTime.text = timeText
 
-        // Управляем видимостью кнопки установки времени и текстом
         if (notificationsEnabled) {
             if (hour != -1 && minute != -1) {
-                // Уведомления включены и время установлено
                 binding.buttonSetTime.text = "Изменить время уведомления"
                 binding.textNotificationTime.text = "Уведомление в ${String.format("%02d:%02d", hour, minute)}"
             } else {
-                // Уведомления включены, но время не установлено
                 binding.buttonSetTime.text = "Установить время уведомления"
                 binding.textNotificationTime.text = "Время уведомления не установлено"
             }
@@ -104,12 +95,10 @@ class SettingsActivity : AppCompatActivity() {
         val minute = sharedPreferences.getInt(PREF_NOTIFICATION_MINUTE, -1)
 
         if (hour != -1 && minute != -1) {
-            // Время уже установлено, просто включаем уведомления
             NotificationService.scheduleDailyNotification(this, hour, minute)
             binding.textNotificationTime.text = "Уведомление в ${String.format("%02d:%02d", hour, minute)}"
             binding.buttonSetTime.text = "Изменить время уведомления"
         } else {
-            // Время не установлено, показываем статус
             binding.textNotificationTime.text = "Время уведомления не установлено"
             binding.buttonSetTime.text = "Установить время уведомления"
         }
@@ -136,23 +125,19 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     private fun checkNotificationPermission() {
-        // Для Android 13+ проверяем разрешение на уведомления
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             when {
                 ContextCompat.checkSelfPermission(
                     this,
                     android.Manifest.permission.POST_NOTIFICATIONS
                 ) == PackageManager.PERMISSION_GRANTED -> {
-                    // Разрешение уже есть
                     enableNotificationsWithoutTimePicker()
                 }
                 else -> {
-                    // Запрашиваем разрешение
                     requestPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
                 }
             }
         } else {
-            // Для версий ниже Android 13 разрешение не требуется
             enableNotificationsWithoutTimePicker()
         }
     }
@@ -165,7 +150,6 @@ class SettingsActivity : AppCompatActivity() {
         val timePicker = TimePickerDialog(
             this,
             { _, hourOfDay, minute ->
-                // Сохраняем настройки
                 saveNotificationSettings(
                     enabled = true,
                     hour = hourOfDay,
@@ -173,14 +157,12 @@ class SettingsActivity : AppCompatActivity() {
                     timeText = "Уведомление в ${String.format("%02d:%02d", hourOfDay, minute)}"
                 )
 
-                // Устанавливаем уведомление
                 NotificationService.scheduleDailyNotification(
                     this,
                     hourOfDay,
                     minute
                 )
 
-                // Обновляем UI
                 binding.textNotificationTime.text = "Уведомление в ${String.format("%02d:%02d", hourOfDay, minute)}"
                 binding.buttonSetTime.text = "Изменить время уведомления"
                 binding.switchNotifications.isChecked = true
@@ -192,12 +174,4 @@ class SettingsActivity : AppCompatActivity() {
         )
         timePicker.show()
     }
-
-    // УДАЛИТЕ метод onPause полностью - он не нужен
-    // override fun onPause() {
-    //     super.onPause()
-    //     // Сбрасываем выделение в навигации при выходе из настроек
-    //     val mainActivity = MainActivity()
-    //     mainActivity.resetBottomNavigation()
-    // }
 }
