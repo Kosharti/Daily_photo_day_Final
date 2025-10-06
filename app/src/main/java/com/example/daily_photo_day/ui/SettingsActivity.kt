@@ -18,7 +18,6 @@ class SettingsActivity : AppCompatActivity() {
     private lateinit var binding: ActivitySettingsBinding
     private lateinit var sharedPreferences: SharedPreferences
 
-    // Ключи для SharedPreferences
     companion object {
         private const val PREF_NOTIFICATIONS_ENABLED = "notifications_enabled"
         private const val PREF_NOTIFICATION_HOUR = "notification_hour"
@@ -174,4 +173,5 @@ class SettingsActivity : AppCompatActivity() {
         )
         timePicker.show()
     }
+
 }
