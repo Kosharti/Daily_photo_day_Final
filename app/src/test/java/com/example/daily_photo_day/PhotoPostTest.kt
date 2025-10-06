@@ -11,7 +11,6 @@ class PhotoPostTest {
 
     @Test
     fun `getYear should return correct year from date string`() {
-        // Arrange
         val post = PhotoPost(
             imageUri = "test_uri",
             title = "Test",
@@ -20,16 +19,13 @@ class PhotoPostTest {
             date = "15.12.2023 14:30"
         )
 
-        // Act
         val year = post.getYear()
 
-        // Assert
         assertEquals(2023, year)
     }
 
     @Test
     fun `getYear should return current year for invalid date`() {
-        // Arrange
         val post = PhotoPost(
             imageUri = "test_uri",
             title = "Test",
@@ -39,31 +35,25 @@ class PhotoPostTest {
         )
         val currentYear = Calendar.getInstance().get(Calendar.YEAR)
 
-        // Act
         val year = post.getYear()
 
-        // Assert
         assertEquals(currentYear, year)
     }
 
     @Test
     fun `isValidDate should return true for valid date`() {
-        // Act & Assert
         assertTrue(PhotoPost.Companion.isValidDate("15.12.2023 14:30"))
     }
 
     @Test
     fun `isValidDate should return false for invalid date`() {
-        // Act & Assert
         assertFalse(PhotoPost.Companion.isValidDate("invalid_date"))
     }
 
     @Test
     fun `getCurrentDateTime should return current date in correct format`() {
-        // Act
         val currentDateTime = PhotoPost.Companion.getCurrentDateTime()
 
-        // Assert
         assertTrue(PhotoPost.Companion.isValidDate(currentDateTime))
     }
 }

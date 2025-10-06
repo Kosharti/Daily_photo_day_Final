@@ -40,7 +40,6 @@ class PhotoPostDaoTest {
 
     @Test
     fun testInsertAndRetrievePost() = runBlocking {
-        // Arrange
         val post = PhotoPost(
             imageUri = "test_uri",
             title = "Test Post",
@@ -49,11 +48,9 @@ class PhotoPostDaoTest {
             date = "15.12.2023 14:30"
         )
 
-        // Act
         val id = dao.insertPost(post)
         val retrievedPost = dao.getPostById(id)
 
-        // Assert
         assertNotNull(retrievedPost)
         assertEquals("Test Post", retrievedPost?.title)
         assertEquals("Test Description", retrievedPost?.description)
@@ -61,7 +58,6 @@ class PhotoPostDaoTest {
 
     @Test
     fun testUpdatePost() = runBlocking {
-        // Arrange
         val post = PhotoPost(
             imageUri = "test_uri",
             title = "Original Title",
@@ -72,18 +68,15 @@ class PhotoPostDaoTest {
         val id = dao.insertPost(post)
         val savedPost = dao.getPostById(id)!!
 
-        // Act
         val updatedPost = savedPost.copy(title = "Updated Title")
         dao.updatePost(updatedPost)
         val result = dao.getPostById(id)
 
-        // Assert
         assertEquals("Updated Title", result?.title)
     }
 
     @Test
     fun testDeletePost() = runBlocking {
-        // Arrange
         val post = PhotoPost(
             imageUri = "test_uri",
             title = "Test Post",
@@ -94,17 +87,14 @@ class PhotoPostDaoTest {
         val id = dao.insertPost(post)
         val savedPost = dao.getPostById(id)!!
 
-        // Act
         dao.deletePost(savedPost)
         val result = dao.getPostById(id)
 
-        // Assert
         assertNull(result)
     }
 
     @Test
     fun testGetAllPostsReturnsPostsInDescendingOrder() = runBlocking {
-        // Arrange
         val post1 = PhotoPost(
             imageUri = "uri1",
             title = "Post 1",
@@ -120,12 +110,10 @@ class PhotoPostDaoTest {
             date = "15.12.2023 14:30"
         )
 
-        // Act
         dao.insertPost(post1)
         dao.insertPost(post2)
         val allPosts = dao.getAllPosts().first()
 
-        // Assert
         assertEquals(2, allPosts.size)
         assertEquals("Post 2", allPosts[0].title) // Should be newest first
         assertEquals("Post 1", allPosts[1].title)
@@ -133,10 +121,8 @@ class PhotoPostDaoTest {
 
     @Test
     fun testGetPostByIdReturnsNullForNonExistentId() = runBlocking {
-        // Act
         val result = dao.getPostById(999L)
 
-        // Assert
         assertNull(result)
     }
 }
